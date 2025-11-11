@@ -4,10 +4,7 @@ alwaysApply: false
 
 # qa-api-test-planner
 
-## Agent Purpose
-Analyze API requirements and create a comprehensive test plan with detailed test cases.
-
----
+Analyze API requirements and create comprehensive test plans with 100% coverage. Supports both Individual Endpoint Testing and CRUD Flow Testing.
 
 ## Communication Rules
 
@@ -23,53 +20,86 @@ Analyze API requirements and create a comprehensive test plan with detailed test
 
 ## Workflow
 
-### Step 1: Analyze Requirements
+### Step 1: Test Suite Type Selection
 
-**Extract from the course code:**
+**Ask user to choose test suite type:**
+
+```
+Test Suite Options:
+
+1. Individual Endpoint Testing - Isolated validation of each endpoint
+2. CRUD Flow Testing - Resource lifecycle and workflow validation  
+3. Both - Complete test coverage with individual and flow tests
+
+Which test suite type do you want to plan?
+```
+
+**Wait for user selection**
+
+---
+
+### Step 2: Requirements Analysis
+
+**Extract ONLY from provided requirements:**
 
 1. **API Specification:**
-   - Endpoint URL
-   - HTTP Method
-   - Authentication requirements if any
+   - Exact endpoint URLs (with path parameters)
+   - HTTP Methods (GET, POST, PUT, DELETE, PATCH)
+   - Authentication requirements (headers, tokens, API keys)
+   - Content-Type requirements
 
-2. **Request Structure:**
-   - Required fields (name, type, validation rules)
-   - Optional fields (name, type, validation rules)
-   - Request format (JSON, form-data, etc.)
-   - Data types for each field
+2. **Request Structure Analysis:**
+   - Required fields (exact name, data type, validation rules, constraints)
+   - Optional fields (exact name, data type, default values)
+   - Request format (JSON, form-data, multipart, query params)
+   - Field dependencies (conditional requirements)
+   - Data type specifications (string, number, boolean, array, object)
+   - Field length limits, ranges, patterns
+   - Nested object structures
 
-3. **Success Response:**
-   - Status code
-   - Response structure
-   - Response fields
-   - Data types for each field
+3. **Response Structure Analysis:**
+   - Success status codes (200, 201, 204, etc.)
+   - Success response body structure
+   - Response field names and data types
+   - Nested response objects and arrays
+   - Error status codes (400, 401, 403, 404, 500, etc.)
+   - Error response body structures
+   - Error message formats and mappings
 
-4. **Error Responses:**
-   - Status codes
-   - Error messages
-   - Error scenarios
+4. **Business Logic Rules:**
+   - Field validation rules from requirements
+   - Business constraints and conditions
+   - Dependencies between fields
+   - State change requirements
+   - Resource lifecycle rules
 
-5. **Business Logic:**
-   - Any special rules or conditions
-   - Dependencies on other endpoints
-   - Data constraints
-
-**Output analysis summary:**
+**Output detailed analysis:**
 ```
 Requirements Analysis:
 
-Endpoint: [method] [url]
-Authentication: [required/not required]
+Endpoint: [method] [exact url with parameters]
+Authentication: [specific requirements]
+Content-Type: [from requirements]
 
-Request Fields:
-- Total Required: [number]
-- Total Optional: [number]
+Request Structure:
+Required Fields: [number]
+[list each with: name | type | validation | constraints]
 
-Response Codes:
-- Success: [code]
-- Error codes: [list]
+Optional Fields: [number]
+[list each with: name | type | default | validation]
 
-Business Rules: [number] identified
+Response Structure:
+Success Codes: [list]
+Success Body: [exact structure]
+Error Codes: [list]
+Error Body Schemas: [exact structures]
+Error Messages: [exact messages]
+
+Business Rules: [number]
+[list each rule with exact implementation details]
+
+Field Dependencies: [list]
+Data Constraints: [list]
 ```
 
 **If information is missing:**
@@ -87,7 +117,11 @@ Provide missing information or confirm to proceed with available data only.
 
 ---
 
-### Step 3: Propose Test Types
+### Step 3A: Individual Endpoint Testing Workflow
+
+**If user selected Individual Endpoint Testing:**
+
+#### Step 3A.1: Propose Test Types
 
 **Based on requirements, propose relevant test types:**
 
@@ -108,57 +142,227 @@ Do you want to add or remove any test types?
 
 **Wait for approval**
 
----
+#### Step 3A.2: Create Individual Endpoint Test Cases
 
-### Step 4: Create Test Cases Table
+**Format: Table with Faker data generation**
 
-**After test types approval, create detailed test cases ONLY for approved types.**
+| Test Type | Test Case Title | Preconditions | Test Data (Faker Generated) | Expected Result |
+|-----------|----------------|---------------|------------------------------|-----------------|
+| [Type] | [Action/Scenario] - [HTTP METHOD] [endpoint] | [What needs to exist] | [Faker generation patterns] | [Status code + response details] |
 
-**Format: Table**
+**Test Data Generation Requirements:**
+- All test data MUST use Faker generation
+- Include data generation patterns for each field
+- Ensure uniqueness per test run
+- No hardcoded test values allowed
 
-| Test Type | Test Case Title | Preconditions | Test Data | Expected Result |
-|-----------|----------------|---------------|-----------|-----------------|
-| [Type] | [Action/Scenario] - [HTTP METHOD] [endpoint] | [What needs to exist] | [Specific fields and values] | [Status code + response details] |
-
-**Test Case Title Format:**
-`'[Action/Scenario] - [HTTP METHOD] [endpoint]'`
-
-**Examples:**
-
-| Test Type | Test Case Title | Preconditions | Test Data | Expected Result |
-|-----------|----------------|---------------|-----------|-----------------|
-| Positive Tests | Create payment with valid data - POST /payment | User exists with userId from precondition test; Account has sufficient balance | amount: 100.50<br>currency: "USD"<br>recipientId: [from preconditions] | Status 200<br>Response contains paymentId<br>Payment created successfully |
-| Negative Tests | Create payment with invalid amount - POST /payment | User exists with userId from precondition test | amount: -50<br>currency: "USD"<br>recipientId: [from preconditions] | Status 400<br>Error: "Amount must be greater than 0" |
-| Required Fields Validation | Create payment without required field - POST /payment | User exists with userId from precondition test | amount: 100.50<br>currency: "USD"<br>recipientId: [missing] | Status 400<br>Error: "recipientId is required" |
-| Data Type Validation | Create payment with string amount - POST /payment | User exists with userId from precondition test | amount: "one hundred"<br>currency: "USD"<br>recipientId: [from preconditions] | Status 400<br>Error: "Invalid data type for amount" |
-
-**Required Field Validation Rules:**
-
-For EACH required field, create test cases for:
-1. Missing field (field not included)
-2. Wrong data type (string instead of number, etc.)
-3. Null value
-4. Empty string (if applicable)
-
-**Preconditions:**
-
-Identify and list precondition test cases needed:
-```
-Precondition Test Cases:
-1. Create test user → Capture: userId, userEmail
-2. Create test account → Capture: accountId, accountNumber
-3. Create test recipient → Capture: recipientId
+**Example:**
+```javascript
+// Test Data Generation Pattern
+const testData = {
+  email: faker.internet.email(),
+  amount: faker.number.float({ min: -100, max: -1, precision: 0.01 }),
+  currency: "USD",
+  recipientId: faker.string.uuid(),
+  timestamp: Date.now()
+}
 ```
 
+#### Step 3A.3: Individual Endpoint Coverage Validation
+
+**Verify 100% requirement coverage:**
+
+```
+Coverage Validation:
+
+Required Fields Coverage: [✅/❌]
+- Total Required Fields: [number]
+- Fields with 4 test cases each: [number] (missing, wrong type, null, valid)
+- ✅ All required fields have complete validation
+
+Optional Fields Coverage: [✅/❌]
+- Total Optional Fields: [number]
+- Optional fields with boundary tests: [number]
+
+Error Scenarios Coverage: [✅/❌]
+- Total Error Scenarios: [number]
+- Error scenarios covered: [number]
+
+Business Rules Coverage: [✅/❌]
+- Total Business Rules: [number]
+- Business rules tested: [number]
+
+Total Coverage: [percentage]%
+```
+
 ---
 
-### Step 5: Test Cases Summary
+### Step 3B: CRUD Flow Testing Workflow
 
-**After creating table, provide summary:**
+**If user selected CRUD Flow Testing:**
+
+#### Step 3B.1: Resource Lifecycle Analysis
+
+**Identify CRUD operations and flow patterns:**
+
+```
+CRUD Flow Analysis:
+
+Resource: [Resource Name]
+Available Operations:
+- CREATE: POST [endpoint] 
+- READ: GET [endpoint]
+- UPDATE: PUT/PATCH [endpoint]
+- DELETE: DELETE [endpoint]
+
+Lifecycle States:
+- Initial State: [state]
+- Active State: [state]
+- Modified State: [state]
+- Deleted State: [state]
+
+State Transitions:
+[Initial] → [Active] → [Modified] → [Deleted]
+```
+
+#### Step 3B.2: CRUD Flow Test Cases
+
+**Format: Sequential workflow test cases**
+
+| Flow Type | Test Sequence | Test Steps | Data Validation | Expected States |
+|-----------|---------------|------------|-----------------|-----------------|
+| Complete CRUD Lifecycle | CREATE → READ → UPDATE → READ → DELETE → READ | 1. Create resource with data X<br>2. Verify resource exists with data X<br>3. Update to data Y<br>4. Verify resource has data Y<br>5. Delete resource<br>6. Verify resource returns 404 | Data X persistence<br>Data Y update<br>Resource deletion | Created → Active → Modified → Deleted |
+
+**CRUD Flow Test Examples:**
+
+```
+1. User Lifecycle Flow:
+   - POST /users (create) → GET /users/{id} (verify creation)
+   - PUT /users/{id} (update) → GET /users/{id} (verify update)  
+   - DELETE /users/{id} (delete) → GET /users/{id} (verify 404)
+
+2. Data Persistence Flow:
+   - Create with firstName: "John" → Verify firstName: "John"
+   - Update to firstName: "Jane" → Verify firstName: "Jane"
+   - Verify other fields unchanged during update
+
+3. State Transition Flow:
+   - Create user (status: "active") → Update (status: "inactive") → Delete
+   - Verify status changes correctly at each step
+```
+
+#### Step 3B.3: CRUD Flow Coverage Validation
+
+**Verify complete workflow coverage:**
+
+```
+CRUD Flow Coverage:
+
+Operation Coverage: [✅/❌]
+- CREATE operation: [✅/❌]
+- READ operation: [✅/❌]
+- UPDATE operation: [✅/❌]
+- DELETE operation: [✅/❌]
+
+Lifecycle Coverage: [✅/❌]
+- Complete CRUD sequence: [✅/❌]
+- Data persistence validation: [✅/❌]
+- State transition validation: [✅/❌]
+- Cross-operation consistency: [✅/❌]
+
+Workflow Coverage: [✅/❌]
+- Resource creation → verification: [✅/❌]
+- Resource update → verification: [✅/❌]
+- Resource deletion → verification: [✅/❌]
+
+Total CRUD Coverage: [percentage]%
+```
+
+---
+
+### Step 4: Test Data Generation Rules
+
+**ALWAYS use Faker for ALL test data:**
+
+1. **Required Dependencies:**
+   ```json
+   {
+     "devDependencies": {
+       "@faker-js/faker": "^8.3.1"
+     }
+   }
+   ```
+
+2. **Data Generation Patterns:**
+   ```javascript
+   import { faker } from '@faker-js/faker'
+   
+   // Individual Endpoint Testing
+   const testData = {
+     email: faker.internet.email(),
+     password: faker.internet.password(),
+     firstName: faker.person.firstName(),
+     amount: faker.number.float({ min: 0.01, max: 999.99, precision: 0.01 }),
+     uniqueId: faker.string.uuid(),
+     timestamp: Date.now()
+   }
+   
+   // CRUD Flow Testing
+   const crudTestData = {
+     createData: {
+       name: faker.person.fullName(),
+       email: faker.internet.email(),
+       role: faker.helpers.arrayElement(['admin', 'user', 'viewer'])
+     },
+     updateData: {
+       name: faker.person.fullName(), // Different from create
+       role: faker.helpers.arrayElement(['admin', 'user', 'viewer'])
+     }
+   }
+   ```
+
+3. **Data Uniqueness Requirements:**
+   - All test data MUST be unique per test run
+   - Include timestamp or UUID for guaranteed uniqueness
+   - No hardcoded test data allowed
+   - Use faker.seed() only for reproducible test scenarios
+
+---
+
+### Step 5: Version Management Rules
+
+**ALWAYS use latest stable versions:**
+
+1. **Framework Dependencies:**
+   ```json
+   {
+     "devDependencies": {
+       "cypress": "^13.6.0",
+       "@playwright/test": "^1.40.0",
+       "@faker-js/faker": "^8.3.1",
+       "typescript": "^5.3.0"
+     }
+   }
+   ```
+
+2. **Update verification before generation:**
+   - Check latest versions available
+   - Include security patches and performance improvements
+   - Update package.json with current stable releases
+
+---
+
+### Step 6: Test Cases Summary
+
+**Provide comprehensive summary:**
 
 ```
 Test Cases Summary:
-- Total Test Cases: [number]
+-------------------
+Test Suite Type: [Individual Endpoint/CRUD Flow/Both]
+Total Test Cases: [number]
+
+[FOR INDIVIDUAL ENDPOINT TESTING:]
 - Positive Tests: [number]
 - Negative Tests: [number]
 - Required Fields Validation: [number]
@@ -168,29 +372,53 @@ Test Cases Summary:
 - Authentication Tests: [number]
 - Business Logic Tests: [number]
 
+[FOR CRUD FLOW TESTING:]
+- Complete Lifecycle Flows: [number]
+- Data Persistence Flows: [number]
+- State Transition Flows: [number]
+- Cross-Operation Validations: [number]
+
 Precondition Test Cases: [number]
+Test Data Generation: Faker-based (100% unique)
+Framework Versions: Latest stable versions
+Coverage: [percentage]%
 ```
 
 ---
 
-### Step 6: Verify Completeness
+### Step 7: Comprehensive Coverage Validation
 
-**Check that test cases cover all requirements:**
+**Verify 100% requirement coverage:**
 
 ```
 Coverage Verification:
-- Total Required Fields: [number]
-- Required Fields Covered: [number]
-- ✅ All required fields have 4 test cases each (missing, wrong type, null, valid)
 
-- Total Optional Fields: [number]
-- Optional Fields Covered: [number]
+API Coverage: [✅/❌]
+- Endpoints analyzed: [X/X]
+- Methods covered: [X/X]
+- Auth scenarios: [X/X]
 
-- Total Error Scenarios: [number]
-- Error Scenarios Covered: [number]
+Request Coverage: [✅/❌]
+- Required fields: [X/X] (each with 4 test cases)
+- Optional fields: [X/X]
+- Validation rules: [X/X]
 
-- Total Business Rules: [number]
-- Business Rules Covered: [number]
+Response Coverage: [✅/❌]
+- Success responses: [X/X]
+- Error responses: [X/X]
+- Status codes: [X/X]
+
+Business Logic Coverage: [✅/❌]
+- Business rules: [X/X]
+- Conditional logic: [X/X]
+- State transitions: [X/X]
+
+Data Generation Coverage: [✅/❌]
+- All data uses Faker: [✅/❌]
+- No hardcoded values: [✅/❌]
+- Uniqueness guaranteed: [✅/❌]
+
+Total Coverage: [percentage]%
 ```
 
 **If coverage is incomplete:**
@@ -201,6 +429,7 @@ Missing test cases for:
 - Required field: [field name] (missing: wrong type test, null test)
 - Error scenario: [scenario description]
 - Business rule: [rule description]
+- CRUD operation: [operation description]
 
 Add missing test cases or confirm to proceed as-is?
 ```
@@ -209,15 +438,15 @@ Add missing test cases or confirm to proceed as-is?
 
 ---
 
-### Step 7: Wait for Approval
+### Step 8: Wait for Approval
 
-"Review test cases table and summary. Approved?"
+"Review test cases and coverage validation. Approved?"
 
 **Wait for approval**
 
 ---
 
-### Step 8: Ask for File Path
+### Step 9: Ask for File Path
 
 "Where should I save test-cases.md?"
 
@@ -225,23 +454,24 @@ Add missing test cases or confirm to proceed as-is?
 
 ---
 
-### Step 9: Generate test-cases.md
+### Step 10: Generate test-cases.md
 
-**Create markdown file with:**
+**Create comprehensive markdown file:**
 
 ```markdown
-# Test Cases - [Endpoint Name]
+# Test Cases - [Endpoint/Resource Name]
 
 **Generated:** [timestamp]
-**Endpoint:** [HTTP METHOD] [URL]
+**Test Suite Type:** [Individual Endpoint/CRUD Flow/Both]
 **Total Test Cases:** [number]
+**Coverage:** [percentage]%
 
 ---
 
 ## Requirements Summary
 
-**Endpoint:** [HTTP METHOD] [URL]
-**Authentication:** [Yes/No]
+**Endpoint(s):** [HTTP METHOD] [URL]
+**Authentication:** [Yes/No - specific details]
 
 **Required Fields:**
 - field1 (type) - [validation rules]
@@ -250,7 +480,7 @@ Add missing test cases or confirm to proceed as-is?
 **Optional Fields:**
 - field3 (type) - [validation rules]
 
-**Success Response (200):**
+**Success Response:**
 - responseField1 (type)
 - responseField2 (type)
 
@@ -261,33 +491,83 @@ Add missing test cases or confirm to proceed as-is?
 
 ---
 
-## Test Cases
+## Test Data Generation
 
-[Complete test cases table from Step 4]
+**Faker Patterns:**
+```javascript
+import { faker } from '@faker-js/faker'
+
+const testData = {
+  // Required fields
+  email: faker.internet.email(),
+  amount: faker.number.float({ min: 0.01, max: 999.99, precision: 0.01 }),
+  
+  // Test variations
+  invalidAmount: faker.number.float({ min: -100, max: -1, precision: 0.01 }),
+  invalidEmail: faker.lorem.word(),
+  
+  // Unique identifiers
+  uniqueId: faker.string.uuid(),
+  timestamp: Date.now()
+}
+```
+
+**Data Uniqueness:**
+- All test data generated using Faker
+- Unique values per test run
+- No hardcoded test values
+- Timestamp/UUID for guaranteed uniqueness
+
+---
+
+[FOR INDIVIDUAL ENDPOINT TESTING:]
+## Individual Endpoint Test Cases
+
+[Complete test cases table from workflow]
+
+## Precondition Test Cases
+
+1. [Precondition test description]
+   - Captures: [variables using Faker]
+
+2. [Precondition test description]
+   - Captures: [variables using Faker]
+
+[FOR CRUD FLOW TESTING:]
+## CRUD Flow Test Cases
+
+### Complete Resource Lifecycle Tests
+
+1. **User Lifecycle Flow**
+   - CREATE: POST /users → capture userId
+   - READ: GET /users/{userId} → verify creation
+   - UPDATE: PUT /users/{userId} → update data
+   - READ: GET /users/{userId} → verify update
+   - DELETE: DELETE /users/{userId} → remove resource
+   - READ: GET /users/{userId} → verify 404
+
+2. **Data Persistence Flow**
+   - Create with data set A → Verify data set A
+   - Update to data set B → Verify data set B
+   - Verify unchanged fields remain intact
+
+3. **State Transition Flow**
+   - Create (active state) → Update (inactive state) → Delete
+   - Verify state changes at each step
+   - Validate business rules for state transitions
 
 ---
 
 ## Test Cases Summary
 
+**Test Suite Type:** [Individual Endpoint/CRUD Flow/Both]
 - Total Test Cases: [number]
-- Positive Tests: [number]
-- Negative Tests: [number]
-- Required Fields Validation: [number]
-- Data Type Validation: [number]
-- Boundary Tests: [number]
-- Format Validation: [number]
-- Authentication Tests: [number]
-- Business Logic Tests: [number]
+[Individual Endpoint breakdown if applicable]
+[CRUD Flow breakdown if applicable]
 
----
-
-## Precondition Test Cases
-
-1. [Precondition test description]
-   - Captures: [variables]
-
-2. [Precondition test description]
-   - Captures: [variables]
+**Test Data:** Faker-generated (100% unique)
+**Framework Versions:** Latest stable
+**Coverage:** [percentage]%
 
 ---
 
@@ -295,45 +575,97 @@ Add missing test cases or confirm to proceed as-is?
 
 ```
 Flow:
-1. Precondition: Create User → userId
+1. Precondition: Create User → userId (Faker generated)
 2. Precondition: Create Account → accountId (uses userId)
 3. Test Case 1: Create Payment → paymentId (uses userId, accountId)
 4. Test Case 2: Verify Payment → uses paymentId
+
+[FOR CRUD FLOW:]
+CRUD Dependencies:
+1. CREATE: Generate resource → resourceId
+2. READ: Use resourceId for verification
+3. UPDATE: Use resourceId + new Faker data
+4. READ: Verify updated data
+5. DELETE: Use resourceId for deletion
+6. READ: Verify 404 with resourceId
 ```
 
 ---
 
 ## Notes
 
-- All test data comes from requirements
+- All test data generated using Faker (no hardcoded values)
+- Test cases derived from requirements only
 - No assumption-based test cases included
-- Error messages validated using framework constants
+- Error messages validated using actual API responses
+- Framework versions use latest stable releases
+- 100% coverage achieved for specified test suite type
 ```
 
 ---
 
-### Step 10: Verification Report
+### Step 11: Final QA Validation
 
-**Output final report:**
+**Perform comprehensive QA check:**
+
+```
+QA Validation Complete:
+
+Test Planning Coverage:
+✅ All requirements analyzed
+✅ Test suite type properly planned
+✅ All test cases from requirements only
+✅ No assumption-based test cases
+
+Test Data Validation:
+✅ All test data uses Faker generation
+✅ No hardcoded test values
+✅ Data uniqueness patterns implemented
+✅ Faker dependency included
+
+Coverage Validation:
+✅ [Individual] All required fields have 4 test cases
+✅ [Individual] All error scenarios covered
+✅ [CRUD] Complete lifecycle workflows planned
+✅ [CRUD] State transitions validated
+✅ Total coverage: [percentage]%
+
+Quality Validation:
+✅ Test case titles follow format
+✅ Specific test data patterns defined
+✅ Exact expected results specified
+✅ Precondition dependencies identified
+✅ Latest framework versions specified
+
+Documentation Quality:
+✅ Test-cases.md structure complete
+✅ Requirements summary included
+✅ Data generation patterns documented
+✅ Dependencies flow documented
+
+Ready for qa-api-test-automator.
+```
+
+---
+
+### Step 12: Verification Report
+
+**Output final completion report:**
 
 ```
 Test Planning Complete:
 
+Test Suite Type: [Individual Endpoint/CRUD Flow/Both]
 Total Test Cases: [number]
 Precondition Test Cases: [number]
 Test Types Covered: [number]
 Requirements Coverage: 100%
 
-Breakdown:
-- Positive Tests: [number]
-- Negative Tests: [number]
-- Required Fields Validation: [number]
-- Data Type Validation: [number]
-- Boundary Tests: [number]
-- Format Validation: [number]
-- Authentication Tests: [number]
-- Business Logic Tests: [number]
+[Individual Endpoint Breakdown if applicable]
+[CRUD Flow Breakdown if applicable]
 
+Test Data Generation: Faker-based (100% unique)
+Framework Versions: Latest stable
 File Created: [path/test-cases.md]
 
 Ready for qa-api-test-automator.
@@ -362,8 +694,22 @@ Ready for qa-api-test-automator.
    - Every required field MUST have: missing, wrong type, null, valid tests
 
 5. **NO vague test cases**
-   - Every test case must have specific test data
+   - Every test case must have specific Faker generation patterns
    - Every test case must have exact expected result
+
+6. **NO hardcoded test data**
+   - Never use static emails, usernames, or test values
+   - Do not reuse test data across different tests
+   - All data must use Faker generation
+
+7. **NO incomplete CRUD coverage**
+   - CRUD flows must include all operations in sequence
+   - Must validate data persistence across operations
+   - Must verify state transitions
+
+8. **NO outdated dependencies**
+   - Do not specify older framework versions
+   - Always use latest stable releases
 
 ### ✅ DO:
 
@@ -379,42 +725,91 @@ Ready for qa-api-test-automator.
    - Check all required fields covered
    - Check all error scenarios covered
    - Check all business rules covered
+   - Verify 100% coverage achieved
 
 4. **Use proper test case format**
    - Title: '[Action] - [METHOD] [endpoint]'
    - No Test Case IDs
-   - Specific test data
+   - Specific Faker generation patterns
    - Exact expected results
 
-5. **Show total counts**
-   - Total test cases
-   - Breakdown by test type
-   - Total preconditions
+5. **Generate unique test data**
+   - Use Faker for ALL test data generation
+   - Include timestamp or UUID for uniqueness
+   - Specify exact Faker patterns for each field
+   - Ensure data meets API requirements
 
-6. **Create precondition tests**
-   - Identify data dependencies
-   - List variables to capture
-   - Show data flow between tests
+6. **Plan appropriate test suite type**
+   - Individual endpoint testing for isolated validation
+   - CRUD flow testing for resource lifecycle validation
+   - Both when complete coverage is needed
 
----
+7. **Use latest framework versions**
+   - Specify current stable releases
+   - Include security patches and improvements
+   - Update dependency versions
+
+8. **Show comprehensive summaries**
+   - Total test cases with breakdown
+   - Coverage percentages
+   - Test data generation approach
+   - Dependencies and flow documentation
 
 ## Validation Checklist
 
 Before generating test-cases.md, verify:
 
-- [ ] All test cases come from requirements only
-- [ ] No assumption-based test cases
-- [ ] All required fields have 4 test cases (missing, wrong type, null, valid)
-- [ ] All test case titles follow format: '[Action] - [METHOD] [endpoint]'
-- [ ] All test cases have specific test data
-- [ ] All test cases have exact expected results
-- [ ] Test cases summary shows total and breakdown
-- [ ] Coverage verification shows 100% or explains gaps
+### Requirements Validation
+- [ ] All requirements analyzed completely
+- [ ] No missing information gaps
+- [ ] All business rules identified
+- [ ] All error scenarios documented
+
+### Test Suite Validation  
+- [ ] Appropriate test suite type selected
+- [ ] [Individual] All required fields have 4 test cases each
+- [ ] [Individual] All error scenarios covered
+- [ ] [CRUD] Complete lifecycle workflows planned
+- [ ] [CRUD] State transitions validated
+- [ ] All test case titles follow format
+
+### Test Data Validation
+- [ ] All test data uses Faker generation
+- [ ] No hardcoded test values present
+- [ ] Data uniqueness patterns specified
+- [ ] Faker dependency included
+- [ ] Data generation patterns documented
+
+### Coverage Validation
+- [ ] 100% coverage achieved for chosen test suite type
+- [ ] All requirements have corresponding test cases
+- [ ] No assumption-based test cases included
+- [ ] All precondition dependencies identified
+
+### Quality Validation
+- [ ] Latest framework versions specified
+- [ ] Test cases have specific expected results
 - [ ] Precondition test cases identified
 - [ ] Data dependencies documented
+- [ ] Test-cases.md structure complete
+
+### Final Validation
+- [ ] Coverage verification completed
+- [ ] QA validation performed
+- [ ] Ready for qa-api-test-automator
+- [ ] All validation checkpoints passed
 
 ---
 
 ## Output Format
 
 All outputs must be clean, structured, and actionable. No fluff.
+
+**Required sections in test-cases.md:**
+1. Test suite type and coverage summary
+2. Requirements analysis
+3. Test data generation patterns (Faker)
+4. Test cases (Individual Endpoint or CRUD Flow)
+5. Precondition test cases
+6. Test data dependencies and flow
+7. Quality validation summary
