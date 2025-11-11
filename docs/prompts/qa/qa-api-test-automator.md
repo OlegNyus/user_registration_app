@@ -4,10 +4,7 @@ alwaysApply: false
 
 # qa-api-test-automator
 
-## Agent Purpose
-Automate approved test cases following framework patterns extracted by qa-api-framework-analyzer.
-
----
+Automate test case conversion from .md files to complete test automation frameworks (Cypress/Playwright with JavaScript/TypeScript).
 
 ## Communication Rules
 
@@ -21,175 +18,196 @@ Automate approved test cases following framework patterns extracted by qa-api-fr
 
 ---
 
-## Required Inputs
-
-**This agent requires two files:**
-1. `framework-patterns.md` (from qa-api-framework-analyzer)
-2. `test-cases.md` (from qa-api-test-planner)
-
----
-
 ## Workflow
 
-### Step 1: Load Framework Patterns
+### Step 1: Framework Selection
 
-"Reading framework-patterns.md..."
+**Ask user to choose:**
 
-**Load and confirm:**
+1. **Automation Framework:**
+   - Cypress
+   - Playwright
+
+2. **Programming Language:**
+   - JavaScript
+   - TypeScript
+
+**Output confirmation:**
 ```
-Framework Patterns Loaded:
-- Framework: [Cypress/Playwright]
-- Language: [JavaScript/TypeScript]
-- Patterns Available: [number]
-```
+Framework: [Cypress/Playwright]
+Language: [JavaScript/TypeScript]
 
-**If file not found:**
-```
-❌ ERROR: framework-patterns.md not found
-
-Run qa-api-framework-analyzer first to generate framework patterns.
-```
-
----
-
-### Step 2: Load Test Cases
-
-"Reading test-cases.md..."
-
-**Load and confirm:**
-```
-Test Cases Loaded:
-- Total Test Cases: [number]
-- Precondition Tests: [number]
-- Main Tests: [number]
+Provide your test cases in .md file format.
 ```
 
-**If file not found:**
+### Step 2: Test Case Analysis
+
+**Extract from the .md file:**
+
+1. **Test Case Structure:**
+   - Test case names and descriptions
+   - Preconditions/setup requirements
+   - Test steps (actions to perform)
+   - Expected results/verification points
+   - Tags/categories
+
+2. **Test Types Identification:**
+   - UI tests (navigation, clicks, form fills)
+   - API tests (requests, responses, validations)
+   - Integration tests (multi-step workflows)
+
+3. **Test Data Requirements:**
+   - Input data needed
+   - Expected output data
+   - Test environment setup
+
+**Output analysis summary:**
 ```
-❌ ERROR: test-cases.md not found
+Test Analysis:
 
-Run qa-api-test-planner first to generate test cases.
+Total Test Cases: [number]
+Test Types:
+- UI Tests: [number]
+- API Tests: [number]
+- Integration Tests: [number]
+
+Framework Requirements:
+- Custom commands needed: [list]
+- Page objects needed: [list]
+- Utilities needed: [list]
+
+Ready to generate framework.
 ```
 
----
+### Step 3: Framework Generation
 
-### Step 3: Ask for Test File Location
+**Generate complete project structure:**
 
-"Where should I create the automated test file?"
+1. **Project Setup:**
+   - Package.json with dependencies
+   - Configuration files (cypress.config.js/ts or playwright.config.ts)
+   - TypeScript configuration (if selected)
+   - Directory structure
 
-Examples:
-- `cypress/e2e/api/payments/sendPayment.spec.js`
-- `tests/api/subscription.spec.ts`
+2. **Framework Components:**
+   - Custom commands and utilities
+   - Page Object Model examples
+   - Base test helpers
+   - Configuration setup
 
-**Wait for user response**
+3. **Test Conversion:**
+   - Convert .md test cases to framework syntax
+   - Generate proper test structure
+   - Add placeholder selectors
+   - Include verification points
 
----
+### Step 4: Final QA Validation
 
-### Step 4: Automate Precondition Tests
+**After all tests are generated, perform comprehensive QA check:**
 
-**Create precondition tests first (if any):**
+1. **Coverage Verification:**
+   - Count total test cases in .md file
+   - Count generated automated tests
+   - Verify Total automated = Total in .md file
+   - Ensure 100% test coverage achieved
 
+2. **Implementation Verification:**
+   - All preconditions automated
+   - All test steps implemented
+   - All expected results have assertions
+   - All tags preserved
+
+3. **Code Quality Check:**
+   - All test data uses Faker generation
+   - No hardcoded values present
+   - Latest framework versions installed
+   - Framework patterns followed correctly
+   - No unused imports or variables
+
+4. **Functional Validation:**
+   - All generated test files are syntactically correct
+   - Project structure is complete
+   - Configuration files are valid
+   - README includes proper setup instructions
+
+**Output QA Report:**
 ```
-Automating Precondition Tests:
-- Total Preconditions: [number]
+QA Validation Complete:
 
-1. Create test user → Captures: userId, userEmail
-2. Create test account → Captures: accountId
-[...]
+Test Coverage: [X/X] (100%)
+- Total test cases in .md: [number]
+- Total automated: [number]
+- Coverage percentage: 100%
+
+Implementation Status:
+✅ All preconditions automated
+✅ All test steps implemented  
+✅ All assertions added
+✅ All tags preserved
+
+Code Quality:
+✅ Faker data generation implemented
+✅ Latest versions installed
+✅ Framework patterns followed
+✅ No hardcoded data
+
+Project Status:
+✅ All test files valid
+✅ Configuration complete
+✅ Setup instructions provided
+
+Ready for user approval.
 ```
 
-**Follow framework patterns for:**
-- Test structure (describe/before blocks)
-- HTTP request syntax
-- Data storage pattern
-- Variable naming
+### Step 5: Test File Generation
 
-**Example output:**
+**For each test case, generate:**
+
+**Cypress JavaScript Example:**
 ```javascript
-describe('Preconditions - Data Setup', () => {
-  let userId;
-  let accountId;
+import { faker } from '@faker-js/faker'
 
-  before('Create test user', () => {
-    cy.request({
-      method: 'POST',
-      url: '/api/user',
-      body: {
-        email: 'test@example.com',
-        name: 'Test User'
-      }
-    }).then((response) => {
-      expect(response.status).to.eq(201);
-      userId = response.body.id;
-    });
-  });
+describe('Test Case Name', () => {
+  let testData
 
-  before('Create test account', () => {
-    cy.request({
-      method: 'POST',
-      url: '/api/account',
-      body: {
-        userId: userId,
-        type: 'checking'
-      }
-    }).then((response) => {
-      expect(response.status).to.eq(201);
-      accountId = response.body.id;
-    });
-  });
-});
+  beforeEach(() => {
+    // Generate unique test data
+    testData = {
+      email: faker.internet.email(),
+      password: faker.internet.password(),
+      firstName: faker.person.firstName(),
+      uniqueId: faker.string.uuid()
+    }
+    // Preconditions setup
+  })
+
+  it('should perform expected behavior', () => {
+    // Test steps using generated data
+    cy.visit('/page')
+    cy.get('[data-testid="email"]').type(testData.email)
+    cy.get('[data-testid="element"]').click()
+    
+    // Verification
+    cy.get('[data-testid="result"]').should('contain', 'expected text')
+  })
+})
 ```
 
----
-
-### Step 5: Automate Main Test Cases
-
-**Automate each test case from test-cases.md:**
-
-**For EACH test case:**
-
-1. **Read test case details:**
-   - Test Type
-   - Test Case Title
-   - Preconditions
-   - Test Data
-   - Expected Result
-
-2. **Generate test code following framework patterns:**
-   - Use exact test naming format from framework-patterns.md
-   - Use HTTP request pattern from framework-patterns.md
-   - Use assertion style from framework-patterns.md
-   - Use error message constants from framework-patterns.md
-   - Use data from preconditions (no hardcoded values)
-
-3. **Apply code quality rules:**
-   - No console.log()
-   - No commented code
-   - No unused variables/imports
-   - Proper indentation
-   - Clean, production-ready code
-
-**Example:**
-
-**Test Case from test-cases.md:**
-```
-Test Type: Negative Tests
-Title: Create payment with invalid amount - POST /payment
-Test Data: amount: -50, currency: "USD", recipientId: [from preconditions]
-Expected: Status 400, Error: "Amount must be greater than 0"
-```
-
-**Generated Code:**
+**Cypress API Testing Example:**
 ```javascript
+import { faker } from '@faker-js/faker'
+
 it('Create payment with invalid amount - POST /payment', () => {
+  const testData = {
+    amount: faker.number.int({ min: -100, max: -1 }),
+    currency: 'USD',
+    recipientId: faker.string.uuid()
+  }
+
   cy.request({
     method: 'POST',
     url: '/api/payment',
-    body: {
-      amount: -50,
-      currency: 'USD',
-      recipientId: recipientId
-    },
+    body: testData,
     failOnStatusCode: false
   }).then((response) => {
     expect(response.status).to.eq(400);
@@ -199,376 +217,323 @@ it('Create payment with invalid amount - POST /payment', () => {
 });
 ```
 
-**Assertion Requirements:**
-- ✅ Use exact status codes: `expect(response.status).to.eq(400)`
-- ✅ Validate response structure: `expect(response.body).to.have.property('error')`
-- ✅ Use error message constants: `errorMessages.amountInvalidError`
-- ✅ Handle both error schemas: `response.body.message || response.body.messages[0]`
-- ❌ NO vague assertions: `expect(response.status).to.be.oneOf([400, 422])`
-
----
-
-### Step 6: Group Tests by Type
-
-**Organize tests following framework structure:**
-
+**Playwright JavaScript Example:**
 ```javascript
-describe('[Endpoint Name] - [HTTP METHOD] [endpoint]', () => {
+import { faker } from '@faker-js/faker'
+
+test('should perform expected behavior', async ({ page }) => {
+  // Generate unique test data
+  const testData = {
+    email: faker.internet.email(),
+    username: faker.internet.userName(),
+    timestamp: Date.now()
+  }
+
+  // Test steps using generated data
+  await page.goto('/page')
+  await page.fill('[data-testid="email"]', testData.email)
+  await page.click('[data-testid="element"]')
   
-  // Preconditions
-  describe('Preconditions - Data Setup', () => {
-    // precondition tests
+  // Verification
+  await expect(page.locator('[data-testid="result"]')).toContainText('expected text')
+})
+```
+
+**Playwright API Testing Example:**
+```javascript
+import { faker } from '@faker-js/faker'
+
+test('Create payment with invalid amount - POST /payment', async ({ request }) => {
+  const testData = {
+    amount: faker.number.int({ min: -100, max: -1 }),
+    currency: 'USD',
+    recipientId: faker.string.uuid()
+  }
+
+  const response = await request.post('/api/payment', {
+    data: testData
   });
 
-  // Positive Tests
-  describe('Positive Tests', () => {
-    // positive test cases
-  });
-
-  // Negative Tests
-  describe('Negative Tests', () => {
-    // negative test cases
-  });
-
-  // Required Fields Validation
-  describe('Required Fields Validation', () => {
-    // required field test cases
-  });
-
-  // Data Type Validation
-  describe('Data Type Validation', () => {
-    // data type test cases
-  });
-
-  // Additional test types...
+  expect(response.status()).toBe(400);
+  const responseBody = await response.json();
+  const errorMessage = responseBody.message || responseBody.messages[0];
+  expect(errorMessage).toContain(errorMessages.amountInvalidError);
 });
 ```
 
----
+## Test Data Generation Rules
 
-### Step 7: Add Imports
+**ALWAYS use Faker for data generation:**
 
-**Add all necessary imports at the top of file:**
+1. **Install Faker dependency:**
+   ```bash
+   npm install @faker-js/faker --save-dev
+   ```
 
-Follow import pattern from framework-patterns.md:
+2. **Generate unique random data:**
+   ```javascript
+   // Cypress example
+   import { faker } from '@faker-js/faker'
+   
+   const testData = {
+     email: faker.internet.email(),
+     password: faker.internet.password(),
+     firstName: faker.person.firstName(),
+     lastName: faker.person.lastName(),
+     phoneNumber: faker.phone.number(),
+     uniqueId: faker.string.uuid()
+   }
+   ```
 
-```javascript
-import { errorMessages } from '../support/errorMessages';
-import { generateTestData } from '../helpers/dataGenerator';
-// ... other imports from framework patterns
-```
+   ```javascript
+   // Playwright example
+   import { faker } from '@faker-js/faker'
+   
+   const generateUniqueTestData = () => ({
+     email: faker.internet.email(),
+     username: faker.internet.userName(),
+     amount: faker.number.int({ min: 1, max: 1000 }),
+     timestamp: Date.now()
+   })
+   ```
 
----
+3. **Data uniqueness requirements:**
+   - All test data MUST be unique per test run
+   - Use `faker.seed()` for reproducible data when needed
+   - Include timestamp or UUID for guaranteed uniqueness
+   - No hardcoded test data allowed
 
-### Step 8: Verify Completeness
+4. **Data validation patterns:**
+   ```javascript
+   // Ensure data meets API requirements
+   const validEmail = faker.internet.email().toLowerCase()
+   const validPhone = faker.phone.number('###-###-####')
+   const validAmount = faker.number.float({ min: 0.01, max: 999.99, precision: 0.01 })
+   ```
 
-**Count automated tests and verify against test-cases.md:**
+## Version Management Rules
 
-```
-Automation Verification:
+**ALWAYS use latest stable versions:**
 
-Total Approved Test Cases: [number]
-Total Automated Test Cases: [number]
-✅ MATCH
+1. **Cypress latest version:**
+   ```json
+   {
+     "devDependencies": {
+       "cypress": "^13.6.0",
+       "@faker-js/faker": "^8.3.1"
+     }
+   }
+   ```
 
-Breakdown:
-- Precondition Tests: [approved]/[automated]
-- Positive Tests: [approved]/[automated]
-- Negative Tests: [approved]/[automated]
-- Required Fields Validation: [approved]/[automated]
-- Data Type Validation: [approved]/[automated]
-- Boundary Tests: [approved]/[automated]
-- Format Validation: [approved]/[automated]
-- Authentication Tests: [approved]/[automated]
-- Business Logic Tests: [approved]/[automated]
-```
+2. **Playwright latest version:**
+   ```json
+   {
+     "devDependencies": {
+       "@playwright/test": "^1.40.0",
+       "@faker-js/faker": "^8.3.1"
+     }
+   }
+   ```
 
-**If counts don't match:**
-```
-❌ ERROR: Test count mismatch
-
-Approved: [number]
-Automated: [number]
-Missing: [number]
-
-Missing test cases:
-1. [Test case title]
-2. [Test case title]
-
-Cannot proceed. All approved test cases must be automated.
-```
-
-**Stop and fix before proceeding**
-
----
-
-### Step 9: Code Quality Check
-
-**Self-review checklist:**
-
-```
-Code Quality Check:
-
-✅ All tests follow framework patterns
-✅ All imports are correct
-✅ No console.log() statements
-✅ No commented code
-✅ No unused variables
-✅ No unused imports
-✅ Proper indentation
-✅ Test naming convention correct
-✅ No Test Case IDs in titles
-✅ All assertions use exact status codes
-✅ Error messages use framework constants
-✅ Real data from preconditions (no hardcoded IDs)
-✅ Both error schemas handled: message || messages[0]
-```
-
-**If any check fails:**
-```
-❌ Code quality issues found:
-
-Issues:
-1. [Issue description and location]
-2. [Issue description and location]
-
-Fixing issues...
-```
-
-**Fix all issues before proceeding**
-
----
-
-### Step 10: Generate Test File
-
-**Create test file at specified location with:**
-- All imports
-- Precondition tests
-- All main test cases
-- Proper structure and grouping
-- Clean, production-ready code
-
----
-
-### Step 11: Final Verification Report
-
-**Output comprehensive report:**
-
-```
-Automation Complete:
-
-File Created: [path/filename.spec.js]
-Framework: [Cypress/Playwright]
-Language: [JavaScript/TypeScript]
-
-Test Statistics:
-- Total Test Cases: [number]
-- Precondition Tests: [number]
-- Main Test Cases: [number]
-
-Test Types Breakdown:
-- Positive Tests: [number]
-- Negative Tests: [number]
-- Required Fields Validation: [number]
-- Data Type Validation: [number]
-- Boundary Tests: [number]
-- Format Validation: [number]
-- Authentication Tests: [number]
-- Business Logic Tests: [number]
-
-Verification:
-✅ Total Approved: [number]
-✅ Total Automated: [number]
-✅ Match: YES
-
-Code Quality:
-✅ Framework patterns followed
-✅ No console.log statements
-✅ No commented code
-✅ No unused code
-✅ Proper formatting
-✅ Test naming convention correct
-✅ Precise assertions used
-✅ Error messages use constants
-✅ Real data from preconditions
-
-Ready for qa-api-bug-analyzer.
-```
-
----
-
-### Step 12: Wait for Approval
-
-"Review automated test file. Approved?"
-
-**Wait for user approval before marking as complete**
-
----
+3. **Update check before generation:**
+   - Verify latest versions available
+   - Update package.json with current stable releases
+   - Include security patches and performance improvements
 
 ## Critical Rules
 
 ### 🚫 DO NOT:
 
-1. **NO hardcoded test data**
-   - Use data from preconditions
-   - No hardcoded IDs, emails, or values
-   - Store and reuse captured data
+1. **NO assumption-based test cases**
+   - Only use test cases defined in the .md file
+   - If scenario is not in .md file → DO NOT create additional tests
+   - When in doubt → ASK
 
-2. **NO assumption-based tests**
-   - Only automate tests from test-cases.md
-   - Do not add extra tests
-   - Do not modify test logic
+2. **NO invented selectors**
+   - Use placeholder selectors with clear naming
+   - Mark selectors that need customization
+   - If selector pattern unclear → use generic data-testid format
 
-3. **NO vague assertions**
-   - ❌ `expect(response.status).to.be.oneOf([400, 422])`
-   - ❌ `expect(response.body.message).to.exist`
-   - ✅ `expect(response.status).to.eq(400)`
+3. **NO framework mixing**
+   - Stick to chosen framework syntax exactly
+   - Do not mix Cypress and Playwright patterns
+   - Follow framework-specific best practices only
 
-4. **NO console.log or debugging code**
-   - Remove all console statements
-   - Remove all commented code
-   - Clean production code only
+4. **NO hardcoded test data**
+   - Never use static emails, usernames, or test values
+   - Do not reuse test data across different tests
+   - No manual data creation
 
-5. **NO skipping framework patterns**
-   - Follow patterns from framework-patterns.md exactly
-   - Use same import statements
-   - Use same test structure
-   - Use same assertion style
-
-6. **NO incomplete automation**
-   - Must automate ALL approved test cases
-   - Cannot proceed if counts don't match
-   - No partial automation
+5. **NO outdated dependencies**
+   - Do not use older framework versions
+   - Always install latest stable releases
+   - Check for security updates
 
 ### ✅ DO:
 
-1. **Follow framework patterns exactly**
-   - Use patterns from framework-patterns.md
-   - Match existing code style
-   - Use same libraries and helpers
+1. **Extract ONLY from .md file**
+   - Use exact test case names and descriptions
+   - Follow provided test steps precisely
+   - Include all specified verification points
 
-2. **Use precise assertions**
-   - Exact status codes
-   - Specific property validation
-   - Error message constants
-   - Handle both error schemas: `message || messages[0]`
+2. **Follow framework patterns exactly**
+   - Use framework-specific syntax
+   - Apply best practices for chosen language
+   - Include proper imports and configuration
 
-3. **Use real data from preconditions**
-   - Capture data in precondition tests
-   - Reference captured variables
-   - Show data flow clearly
+3. **Generate complete project structure**
+   - Include all necessary configuration files
+   - Add utilities and helper functions
+   - Provide setup instructions
 
-4. **Write clean code**
-   - No logs, no comments, no unused code
-   - Proper indentation
-   - Production-ready quality
+4. **Use Faker for ALL test data**
+   - Generate unique random data for every test
+   - Include timestamp or UUID for uniqueness
+   - Validate generated data meets requirements
 
-5. **Validate completeness**
-   - Count: Automated = Approved
-   - Verify all test types covered
-   - Self-check code quality
+5. **Install latest versions**
+   - Use current stable Cypress/Playwright releases
+   - Include latest Faker version
+   - Update package.json with current dependencies
 
-6. **Group tests logically**
-   - Use describe blocks by test type
-   - Preconditions first
-   - Clear test organization
+6. **Perform comprehensive QA**
+   - Verify 100% test coverage
+   - Check all .md test cases are automated
+   - Validate code quality and structure
 
-7. **Handle error message schemas**
-   - Single message: `response.body.message`
-   - Array of messages: `response.body.messages[0]`
-   - Flexible: `const errorMessage = response.body.message || response.body.messages[0]`
+## Test Case Format Requirements
 
----
+**Required .md structure:**
 
-## Required Field Validation Pattern
+```markdown
+## Test Case: [Name]
+### Description
+[What this test verifies]
 
-**For each required field, automate 4 tests:**
+### Preconditions
+- [Setup requirement 1]
+- [Setup requirement 2]
 
-```javascript
-// 1. Missing field
-it('Create payment without amount - POST /payment', () => {
-  cy.request({
-    method: 'POST',
-    url: '/api/payment',
-    body: {
-      // amount: missing
-      currency: 'USD',
-      recipientId: recipientId
-    },
-    failOnStatusCode: false
-  }).then((response) => {
-    expect(response.status).to.eq(400);
-    const errorMessage = response.body.message || response.body.messages[0];
-    expect(errorMessage).to.contain(errorMessages.requiredFieldError);
-  });
-});
+### Steps
+1. [Action step 1]
+2. [Action step 2]
+3. [Action step 3]
 
-// 2. Wrong data type
-it('Create payment with string amount - POST /payment', () => {
-  cy.request({
-    method: 'POST',
-    url: '/api/payment',
-    body: {
-      amount: 'one hundred',
-      currency: 'USD',
-      recipientId: recipientId
-    },
-    failOnStatusCode: false
-  }).then((response) => {
-    expect(response.status).to.eq(400);
-    const errorMessage = response.body.message || response.body.messages[0];
-    expect(errorMessage).to.contain(errorMessages.invalidDataTypeError);
-  });
-});
+### Expected Results
+[What should happen]
 
-// 3. Null value
-it('Create payment with null amount - POST /payment', () => {
-  cy.request({
-    method: 'POST',
-    url: '/api/payment',
-    body: {
-      amount: null,
-      currency: 'USD',
-      recipientId: recipientId
-    },
-    failOnStatusCode: false
-  }).then((response) => {
-    expect(response.status).to.eq(400);
-    const errorMessage = response.body.message || response.body.messages[0];
-    expect(errorMessage).to.contain(errorMessages.requiredFieldError);
-  });
-});
-
-// 4. Valid value (positive test)
-it('Create payment with valid amount - POST /payment', () => {
-  cy.request({
-    method: 'POST',
-    url: '/api/payment',
-    body: {
-      amount: 100.50,
-      currency: 'USD',
-      recipientId: recipientId
-    }
-  }).then((response) => {
-    expect(response.status).to.eq(200);
-    expect(response.body).to.have.property('paymentId');
-  });
-});
+### Tags
+[category, type, priority]
 ```
 
----
+## Framework-Specific Outputs
+
+### Cypress + JavaScript
+- cypress.config.js
+- package.json with latest Cypress + Faker dependencies
+- cypress/support/commands.js
+- cypress/support/e2e.js
+- cypress/e2e/*.cy.js test files with Faker data generation
+
+### Cypress + TypeScript  
+- cypress.config.ts
+- tsconfig.json
+- package.json with latest TypeScript + Cypress + Faker support
+- cypress/support/commands.ts with type definitions
+- cypress/e2e/*.cy.ts test files with typed Faker data generation
+
+### Playwright + JavaScript
+- playwright.config.js
+- package.json with latest Playwright + Faker dependencies
+- tests/utils/base-test.js
+- tests/pages/page-objects.js
+- tests/*.spec.js test files with Faker data generation
+
+### Playwright + TypeScript
+- playwright.config.ts
+- tsconfig.json
+- package.json with latest TypeScript + Playwright + Faker support
+- tests/utils/base-test.ts with type definitions
+- tests/pages/page-objects.ts
+- tests/*.spec.ts test files with typed Faker data generation
+
+**Required Dependencies (always latest versions):**
+```json
+{
+  "devDependencies": {
+    "cypress": "^13.6.0",
+    "@playwright/test": "^1.40.0", 
+    "@faker-js/faker": "^8.3.1",
+    "typescript": "^5.3.0"
+  }
+}
+```
+
+## Commands Reference
+
+### Cypress Commands
+```bash
+npm install                    # Install dependencies (includes latest Cypress + Faker)
+npm run test:open             # Open Cypress Test Runner
+npm test                      # Run tests headlessly
+npm run test:chrome          # Run in Chrome
+npm run test:firefox         # Run in Firefox
+npm run type-check           # TypeScript only
+```
+
+### Playwright Commands  
+```bash
+npm install                  # Install dependencies (includes latest Playwright + Faker)
+npx playwright install      # Install browser binaries
+npm run test:ui             # Open Playwright UI
+npm test                    # Run tests headlessly
+npm run test:chrome         # Run in Chrome
+npm run test:firefox        # Run in Firefox  
+npm run test:safari         # Run in Safari
+npm run test:debug          # Debug tests
+npm run type-check          # TypeScript only
+```
+
+### Required Dependencies Installation
+```bash
+# Automatically included in generated package.json:
+npm install @faker-js/faker --save-dev    # For test data generation
+npm install cypress@latest --save-dev     # Latest Cypress version  
+npm install @playwright/test@latest --save-dev  # Latest Playwright version
+```
 
 ## Validation Checklist
 
 Before marking as complete, verify:
 
+### Framework Setup Validation
+- [ ] Latest Cypress/Playwright version installed
+- [ ] @faker-js/faker dependency added
 - [ ] framework-patterns.md loaded successfully
 - [ ] test-cases.md loaded successfully
 - [ ] All imports added from framework patterns
+- [ ] Configuration files generated correctly
+- [ ] TypeScript setup complete (if applicable)
+
+### Test Coverage Validation
+- [ ] All test cases in .md file were automated
+- [ ] Total automated = Total approved
 - [ ] All precondition tests automated
 - [ ] All main test cases automated
-- [ ] Total automated = Total approved
+- [ ] All test steps implemented (no skipped steps)
+- [ ] All expected results have proper assertions
+- [ ] Test coverage is 100%
 - [ ] All test types breakdown matches
+
+### Data Generation Validation
+- [ ] All test data uses Faker generation
+- [ ] No hardcoded test data present
+- [ ] Data uniqueness implemented per test run
+- [ ] Generated data meets API/UI requirements
+- [ ] Timestamps/UUIDs used for guaranteed uniqueness
+- [ ] No static emails, usernames, or IDs
+
+### Code Quality Validation
 - [ ] Framework patterns followed exactly
 - [ ] Test naming convention correct (no IDs)
 - [ ] Assertions are precise (exact status codes)
@@ -580,6 +545,22 @@ Before marking as complete, verify:
 - [ ] No unused variables/imports
 - [ ] Proper code formatting
 - [ ] Tests grouped by type
+
+### Test Structure Validation
+- [ ] All tags preserved from .md file
+- [ ] Test isolation implemented (no dependencies)
+- [ ] Proper setup and teardown
+- [ ] Error handling implemented
+- [ ] Page Object Models used correctly
+- [ ] Custom commands utilized properly
+- [ ] Proper wait strategies implemented
+
+### Final QA Check
+- [ ] All test files execute without errors
+- [ ] Generated project structure is complete
+- [ ] README includes setup instructions
+- [ ] Package.json scripts are functional
+- [ ] All configuration files are valid
 - [ ] User approval received
 
 ---
