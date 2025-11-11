@@ -101,6 +101,7 @@ paths:
                 $ref: '#/components/schemas/Error'
     put:
       summary: Update user by ID
+      description: Update user information. Provide at least one field (name or email). Both fields are optional.
       tags:
         - Users
       parameters:
@@ -119,11 +120,12 @@ paths:
               properties:
                 name:
                   type: string
-                  example: John Doe
+                  example: John Updated Name
                 email:
                   type: string
                   format: email
-                  example: john.doe@example.com
+                  example: john.updated@example.com
+              description: At least one field must be provided
       responses:
         '200':
           description: User updated successfully
