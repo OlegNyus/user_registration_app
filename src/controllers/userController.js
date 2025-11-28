@@ -3,8 +3,12 @@ const userService = require('../services/userService');
 // Get all users
 async function getAllUsers(req, res) {
   try {
-    const users = userService.getAllUsers();
-    res.status(200).json(users);
+    // Parse pagination parameters from query string
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const result = userService.getAllUsers(page, limit);
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

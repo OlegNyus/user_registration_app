@@ -2,46 +2,98 @@
 
 ## Description
 
-This is a REST API for user management built with JavaScript and Express.js. It provides CRUD (Create, Read, Update, Delete) operations for managing users. The API uses in-memory storage, meaning no database is required - all data is stored in memory during runtime.
+A full-stack user management application with a REST API backend and modern React frontend. The application provides CRUD (Create, Read, Update, Delete) operations for managing users through both API endpoints and an interactive web interface. All data is stored in-memory, meaning no database is required.
+
+## Tech Stack
+
+### Backend
+- Node.js + Express.js
+- In-memory data storage
+- CORS enabled
+- Swagger/OpenAPI documentation
+
+### Frontend
+- React 19
+- Vite (build tool)
+- Tailwind CSS
+- Custom hooks for state management
+- Context API for global state
 
 ## Installation
 
 1. Make sure you have Node.js installed (version 14 or higher recommended)
 
-2. Install dependencies:
+2. Install backend dependencies:
 ```bash
 npm install
 ```
 
-This will install the following packages:
-- `express` - Web framework
-- `swagger-ui-express` - Swagger UI for API documentation
-- `swagger-jsdoc` - JSDoc annotations for Swagger
-- `yamljs` - YAML parser for Swagger documentation
+3. Install frontend dependencies:
+```bash
+cd client
+npm install
+cd ..
+```
 
 ## How to Run
 
-Start the server using:
+### Option 1: Run Both Servers Separately
+
+**Terminal 1 - Start the backend server:**
 ```bash
 npm start
 ```
+Backend will run on `http://localhost:3000`
 
-The server will start on `http://localhost:3000` by default. You can change the port by setting the `PORT` environment variable:
+**Terminal 2 - Start the frontend dev server:**
+```bash
+cd client
+npm run dev
+```
+Frontend will run on `http://localhost:5173`
 
+### Option 2: Change Backend Port
+
+If you need to run the backend on a different port:
 ```bash
 PORT=4000 npm start
 ```
+Don't forget to update `client/.env` with the new backend URL.
 
-## Rules
+### Accessing the Application
 
-1. The API supports standard REST operations for user management
-2. All user data is stored in memory (no database)
-3. The API follows a layered architecture:
+- **Frontend UI**: http://localhost:5173
+- **Backend API**: http://localhost:3000
+- **API Documentation**: http://localhost:3000/api-docs
+
+## Features
+
+### Frontend UI Features
+
+- **Responsive Design**: Works on desktop, tablet, and mobile devices
+- **Dark Mode**: Toggle between light and dark themes (persisted in localStorage)
+- **Two View Modes**:
+  - **Grid View**: Card-based layout with user avatars
+  - **List View**: Table layout with sortable columns
+- **Search**: Real-time search by name or email with highlighted results
+- **Sorting**: Click column headers to sort by name, email, or creation date (ascending/descending)
+- **Inline Editing**: Double-click name or email cells in list view to edit directly
+- **Toast Notifications**: Success and error messages for all operations
+- **Loading States**: Skeleton loaders while fetching data
+- **Empty State**: Friendly message when no users exist
+- **Animations**: Smooth transitions for cards, modals, and toasts
+- **All elements tagged with `data-test` attributes for automated testing**
+
+### Backend API Architecture
+
+1. All user data is stored in memory (no database)
+2. Layered architecture:
    - **Routes** - Define API endpoints
    - **Controllers** - Handle HTTP requests and responses
-   - **Services** - Contain business logic
+   - **Services** - Contain business logic and validation
    - **Models** - Manage data storage
-4. The API includes Swagger documentation accessible at `/api-docs`
+3. CORS enabled for frontend communication
+4. Swagger documentation accessible at `/api-docs`
 5. User data includes: `id`, `name`, `email`, and `createdAt` fields
 6. The API starts with 3 pre-populated users
 
@@ -64,7 +116,39 @@ The API comes pre-loaded with 3 users:
    - Email: bob.johnson@example.com
    - Created At: 2024-01-17T00:00:00.000Z
 
-## How to Use the Rest API
+## How to Use the Application
+
+### Using the Frontend UI
+
+The easiest way to interact with the application is through the web interface at http://localhost:5173
+
+**Basic Operations:**
+
+1. **View Users**: Users are displayed automatically when you open the app
+   - Toggle between Grid and List view using the view mode buttons
+   - Use the search bar to filter users by name or email
+
+2. **Add a New User**:
+   - Click the "+ Add User" button in the top right
+   - Fill in the name and email fields
+   - Click "Add User" to create
+
+3. **Edit a User**:
+   - **In Grid View**: Click the "Edit" button on any user card
+   - **In List View**:
+     - Click the "Edit" button, OR
+     - Double-click the name or email cell to edit inline
+     - Press Enter to save, Escape to cancel inline edits
+
+4. **Delete a User**:
+   - Click the "Delete" button on any user
+   - Confirm the deletion in the modal
+
+5. **Toggle Dark Mode**: Click the moon/sun icon in the top right corner
+
+6. **Sort Users** (List View only): Click any column header to sort by that field
+
+### Using the REST API
 
 ### Base URL
 All endpoints are available at: `http://localhost:3000`
@@ -215,3 +299,69 @@ Example error response:
   "error": "Email already exists"
 }
 ```
+
+## Project Structure
+
+```
+user_registration_app/
+├── server.js                 # Backend entry point
+├── package.json              # Backend dependencies
+├── src/                      # Backend source code
+│   ├── routes/              # API route definitions
+│   ├── controllers/         # Request handlers
+│   ├── services/            # Business logic
+│   ├── models/              # Data models
+│   └── swagger/             # API documentation
+│
+└── client/                   # Frontend application
+    ├── package.json         # Frontend dependencies
+    ├── .env                 # Environment variables (API URL)
+    ├── index.html          # HTML entry point
+    ├── vite.config.js      # Vite configuration
+    ├── tailwind.config.js  # Tailwind CSS configuration
+    └── src/
+        ├── App.jsx                    # Main application component
+        ├── main.jsx                   # React entry point
+        ├── index.css                  # Global styles and animations
+        ├── components/                # React components
+        │   ├── Header.jsx
+        │   ├── Toolbar.jsx
+        │   ├── UserGrid.jsx
+        │   ├── UserTable.jsx
+        │   ├── UserCard.jsx
+        │   ├── UserForm.jsx
+        │   ├── DeleteModal.jsx
+        │   ├── LoadingSkeleton.jsx
+        │   ├── EmptyState.jsx
+        │   └── ToastContainer.jsx
+        ├── contexts/                  # React contexts
+        │   └── ToastContext.jsx
+        ├── hooks/                     # Custom React hooks
+        │   ├── useDarkMode.js
+        │   └── useUsers.js
+        ├── services/                  # API service layer
+        │   └── api.js
+        └── utils/                     # Utility functions
+            └── highlight.jsx
+```
+
+## Development Notes
+
+- The backend uses in-memory storage, so all data is lost when the server restarts
+- The frontend uses Vite's HMR (Hot Module Replacement) for fast development
+- CORS is enabled on the backend to allow frontend requests
+- All form inputs are validated on both frontend and backend
+- Toast notifications provide user feedback for all operations
+- Dark mode preference is persisted in browser localStorage
+
+## Future Enhancements
+
+Potential features for future development:
+- Persistent storage (database integration)
+- User authentication and authorization
+- Frontend pagination controls for large user lists
+- Export users to CSV/JSON
+- Import users from file
+- User profile pictures
+- Advanced filtering options
+- Unit and integration tests
