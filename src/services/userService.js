@@ -1,8 +1,43 @@
 const userModel = require('../models/userModel');
 
-// Get all users
-function getAllUsers() {
-  return userModel.getAllUsers();
+// Get all users (with optional pagination)
+function getAllUsers(page = 1, limit = 10) {
+  const allUsers = userModel.getAllUsers();
+
+  // If limit is -1 or 0, return all users without pagination
+  if (limit <= 0) {
+    return {
+      users: allUsers,
+      pagination: {
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: allUsers.length,
+        itemsPerPage: allUsers.length,
+        hasNextPage: false,
+        hasPrevPage: false
+      }
+    };
+  }
+
+  const totalItems = allUsers.length;
+  const totalPages = Math.ceil(totalItems / limit);
+  const currentPage = Math.max(1, Math.min(page, totalPages || 1));
+
+  const startIndex = (currentPage - 1) * limit;
+  const endIndex = startIndex + limit;
+  const paginatedUsers = allUsers.slice(startIndex, endIndex);
+
+  return {
+    users: paginatedUsers,
+    pagination: {
+      currentPage,
+      totalPages,
+      totalItems,
+      itemsPerPage: limit,
+      hasNextPage: currentPage < totalPages,
+      hasPrevPage: currentPage > 1
+    }
+  };
 }
 
 // Get user by ID

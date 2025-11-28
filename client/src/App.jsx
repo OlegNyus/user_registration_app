@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { ToastProvider } from './contexts/ToastContext';
 import { useDarkMode } from './hooks/useDarkMode';
 import { useUsers } from './hooks/useUsers';
@@ -11,16 +11,26 @@ import DeleteModal from './components/DeleteModal';
 import LoadingSkeleton from './components/LoadingSkeleton';
 import EmptyState from './components/EmptyState';
 import ToastContainer from './components/ToastContainer';
+import Pagination from './components/Pagination';
 
 function AppContent() {
   const { darkMode, toggleDarkMode } = useDarkMode();
-  const { users, loading, createUser, updateUser, deleteUser } = useUsers();
+  const { users, pagination, loading, createUser, updateUser, deleteUser, fetchUsers } = useUsers();
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // View mode state
   const [viewMode, setViewMode] = useState('grid');
 
   // Search state
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Fetch users when pagination changes
+  useEffect(() => {
+    fetchUsers(currentPage, itemsPerPage);
+  }, [currentPage, itemsPerPage, fetchUsers]);
 
   // Modal states
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -71,33 +81,43 @@ function AppContent() {
 
   // CRUD operations
   const handleCreateUser = async (userData) => {
-    await createUser(userData);
+    await createUser(userData, currentPage, itemsPerPage);
   };
 
   const handleUpdateUser = async (userData) => {
     if (selectedUser) {
-      await updateUser(selectedUser.id, userData);
+      await updateUser(selectedUser.id, userData, currentPage, itemsPerPage);
     }
   };
 
   const handleDeleteUser = async () => {
     if (selectedUser) {
-      await deleteUser(selectedUser.id);
+      await deleteUser(selectedUser.id, currentPage, itemsPerPage);
     }
   };
 
   // Inline update for table
   const handleInlineUpdate = async (userId, userData) => {
-    await updateUser(userId, userData);
+    await updateUser(userId, userData, currentPage, itemsPerPage);
+  };
+
+  // Pagination handlers
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset to first page when changing items per page
   };
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200 flex flex-col">
       {/* Header */}
       <Header onAddUser={handleOpenCreateModal} onToggleDarkMode={toggleDarkMode} />
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-6 py-8">
+      <main className="max-w-6xl mx-auto px-6 py-8 flex-1 w-full">
         {/* Toolbar */}
         <Toolbar
           searchTerm={searchTerm}
@@ -111,10 +131,10 @@ function AppContent() {
         {loading && <LoadingSkeleton />}
 
         {/* Empty State */}
-        {!loading && users.length === 0 && <EmptyState onAddUser={handleOpenCreateModal} />}
+        {!loading && pagination.totalItems === 0 && <EmptyState onAddUser={handleOpenCreateModal} />}
 
         {/* User Views */}
-        {!loading && users.length > 0 && (
+        {!loading && pagination.totalItems > 0 && (
           <>
             {viewMode === 'grid' && (
               <UserGrid
@@ -137,6 +157,22 @@ function AppContent() {
           </>
         )}
       </main>
+
+      {/* Pagination - Sticky Footer */}
+      {!loading && pagination.totalItems > 0 && (
+        <div className="sticky bottom-0 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 py-4">
+          <div className="max-w-6xl mx-auto px-6">
+            <Pagination
+              currentPage={pagination.currentPage}
+              totalPages={pagination.totalPages}
+              totalItems={pagination.totalItems}
+              itemsPerPage={pagination.itemsPerPage}
+              onPageChange={handlePageChange}
+              onItemsPerPageChange={handleItemsPerPageChange}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Modals */}
       <UserForm

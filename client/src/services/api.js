@@ -53,8 +53,11 @@ async function request(endpoint, options = {}) {
 
 // User API methods
 export const userAPI = {
-  // Get all users
-  getAll: () => request('/users'),
+  // Get all users (with optional pagination)
+  getAll: (page = 1, limit = 10) => {
+    const params = new URLSearchParams({ page, limit });
+    return request(`/users?${params}`);
+  },
 
   // Get user by ID
   getById: (id) => request(`/users/${id}`),
