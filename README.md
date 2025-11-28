@@ -359,7 +359,7 @@ user_registration_app/
 Potential features for future development:
 - Persistent storage (database integration)
 - User authentication and authorization
-- Pagination for large user lists
+- Frontend pagination controls for large user lists
 - Export users to CSV/JSON
 - Import users from file
 - User profile pictures
